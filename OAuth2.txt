@@ -1,0 +1,66 @@
+
+
+
+
+ClientID  = 0oa2499ns0g0RpXxf4x6
+ 
+# app.Module.ts
+----------------
+
+import { OAuthModule} from 'angular-oauth2-oidc';
+
+imports:[
+..,
+..,
+..,
+OAuthModule.forRoot()  // it will allow single sign-on at the root level
+]
+
+
+
+
+#Login.component.ts
+-------------------------------
+
+import { OAuthService, JwksValidationHandler, AuthConfig } from 'angular-oauth2-oidc';
+
+export const authConfig: AuthConfig = {
+  issuer: 'https://dev-990222-admin.okta.com/oauth2/default',
+  redirectUri: window.location.origin,
+  clientId: "0oa2499ns0g0RpXxf4x6"
+};
+
+constructor(....., private oauthService: OAuthService) {
+
+    this.oauthService.configure(authConfig);
+    this.oauthService.tokenValidationHandler = new JwksValidationHandler();
+    this.oauthService.loadDiscoveryDocumentAndTryLogin();
+
+}
+
+// method which is going to be called from From-submit call from html side
+oAuthLogin() {
+    //event.preventDefault();
+    this.oauthService.initImplicitFlow();
+    this.router.navigate(["Home/"]);
+}
+
+
+
+  logout() {
+    this.oauthService.logOut();
+  }
+
+  get givenName() {
+    const claims = this.oauthService.getIdentityClaims();
+    if (!claims) {
+      return null;
+    }
+    return claims['name'];
+  }
+
+
+#login.component.html:
+-------------------------
+
+ <form class="form" (submit)="oAuthLogin($event)" #userForm="ngForm">
